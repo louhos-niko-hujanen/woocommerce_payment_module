@@ -397,6 +397,13 @@ class WC_Payment_Method_Select
 				$result_methods['paymentmethod'] = array($result_methods['paymentmethod']);
 			}
 		}
+
+		$result_methods = apply_filters(
+			'svea_payment_filter_payment_methods',
+			$result_methods,
+			$price
+		);
+
 		self::$available_payment_methods = $result_methods;
 		return self::$available_payment_methods;
 	}
