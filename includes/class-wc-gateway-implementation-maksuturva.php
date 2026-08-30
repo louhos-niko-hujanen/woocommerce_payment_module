@@ -253,9 +253,12 @@ class WC_Gateway_Implementation_Maksuturva extends WC_Gateway_Abstract_Maksuturv
 
 			$payment_row_product = array();
 
-			$payment_row_product['pmt_row_name'] = WC_Utils_Maksuturva::filter_productname($item['name']);
+			$item_name = is_object($item) && method_exists($item, 'get_name') ? $item->get_name() : (isset($item['name']) ? $item['name'] : '');
+			$item_qty = is_object($item) && method_exists($item, 'get_quantity') ? $item->get_quantity() : (isset($item['qty']) ? $item['qty'] : 1);
+
+			$payment_row_product['pmt_row_name'] = WC_Utils_Maksuturva::filter_productname($item_name);
 			$payment_row_product['pmt_row_desc'] = WC_Utils_Maksuturva::filter_description($description);
-			$payment_row_product['pmt_row_quantity'] = WC_Utils_Maksuturva::filter_quantity($item['qty']);
+			$payment_row_product['pmt_row_quantity'] = WC_Utils_Maksuturva::filter_quantity($item_qty);
 
 			$sku = $product->get_sku();
 			// Trunctate to 100 characters
@@ -553,18 +556,21 @@ class WC_Gateway_Implementation_Maksuturva extends WC_Gateway_Abstract_Maksuturv
 		$fee_rows = array();
 
 		foreach ($fees as $fee) {
+			$fee_name = is_object($fee) && method_exists($fee, 'get_name') ? $fee->get_name() : (isset($fee['name']) ? $fee['name'] : '');
+			$line_total = is_object($fee) && method_exists($fee, 'get_total') ? (float) $fee->get_total() : (float) (isset($fee['line_total']) ? $fee['line_total'] : 0);
+			$line_tax = is_object($fee) && method_exists($fee, 'get_total_tax') ? (float) $fee->get_total_tax() : (float) (isset($fee['line_tax']) ? $fee['line_tax'] : 0);
 
-			$fee_total = $fee['line_total'] + $fee['line_tax'];
+			$fee_total = $line_total + $line_tax;
 
-			if ($fee['name'] === __('Payment handling fee', 'wc-maksuturva')) {
+			if ($fee_name === __('Payment handling fee', 'wc-maksuturva')) {
 				$this->removed_fees += $fee_total;
 				continue;
 			}
 
 			$this->total_fees += $fee_total;
 
-			if ($fee_total > 0) {
-				$fee_tax = 100 * ($fee['line_tax'] / $fee['line_total']);
+			if ($fee_total > 0 && $line_total > 0) {
+				$fee_tax = 100 * ($line_tax / $line_total);
 				/***
 				 * Round fee tax to nearest 0.5
 				 */
@@ -574,8 +580,8 @@ class WC_Gateway_Implementation_Maksuturva extends WC_Gateway_Abstract_Maksuturv
 			}
 
 			$fee_rows[] = array(
-				'pmt_row_name' => substr(WC_Utils_Maksuturva::filter_productname($fee['name']), 0, 40),
-				'pmt_row_desc' => substr(WC_Utils_Maksuturva::filter_productname($fee['name']), 0, 1000),
+				'pmt_row_name' => substr(WC_Utils_Maksuturva::filter_productname($fee_name), 0, 40),
+				'pmt_row_desc' => substr(WC_Utils_Maksuturva::filter_productname($fee_name), 0, 1000),
 				'pmt_row_quantity' => 1,
 				'pmt_row_deliverydate' => date('d.m.Y'),
 				'pmt_row_price_gross' => WC_Utils_Maksuturva::filter_price($fee_total),
@@ -609,12 +615,15 @@ class WC_Gateway_Implementation_Maksuturva extends WC_Gateway_Abstract_Maksuturv
 		$option_rows = array();
 
 		foreach ($shipping_options as $option) {
+			$opt_name = is_object($option) && method_exists($option, 'get_name') ? $option->get_name() : (isset($option['name']) ? $option['name'] : '');
+			$opt_total = is_object($option) && method_exists($option, 'get_total') ? (float) $option->get_total() : (float) (isset($option['total']) ? $option['total'] : 0);
+			$opt_tax = is_object($option) && method_exists($option, 'get_total_tax') ? (float) $option->get_total_tax() : (float) (isset($option['total_tax']) ? $option['total_tax'] : 0);
 
-			$option_total = $option['total'] + $option['total_tax'];
-			$this->shipping_option_tax_total += $option['total_tax'];
+			$option_total = $opt_total + $opt_tax;
+			$this->shipping_option_tax_total += $opt_tax;
 
-			if ($option_total > 0) {
-				$option_tax = 100 * ($option['total_tax'] / $option['total']);
+			if ($option_total > 0 && $opt_total > 0) {
+				$option_tax = 100 * ($opt_tax / $opt_total);
 				/***
 				 * Round tax to nearest 0.5
 				 */
@@ -625,8 +634,8 @@ class WC_Gateway_Implementation_Maksuturva extends WC_Gateway_Abstract_Maksuturv
 
 
 			$option_rows[] = array(
-				'pmt_row_name' => substr(WC_Utils_Maksuturva::filter_productname($option['name']), 0, 40),
-				'pmt_row_desc' => substr(WC_Utils_Maksuturva::filter_productname($option['name']), 0, 1000),
+				'pmt_row_name' => substr(WC_Utils_Maksuturva::filter_productname($opt_name), 0, 40),
+				'pmt_row_desc' => substr(WC_Utils_Maksuturva::filter_productname($opt_name), 0, 1000),
 				'pmt_row_quantity' => 1,
 				'pmt_row_deliverydate' => date('d.m.Y'),
 				'pmt_row_price_gross' => WC_Utils_Maksuturva::filter_price($option_total),

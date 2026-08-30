@@ -946,11 +946,13 @@ class WC_Gateway_Maksuturva extends \WC_Payment_Gateway {
 	 */
 	protected function add_surcharge( $payment, $order ) {
 		if ( ! $payment->is_cancelled() && $payment->includes_surcharge() ) {
-			$fee          = new \stdClass();
-			$fee->name    = __( 'Surcharge from Payment Gateway', 'wc-maksuturva' );
-			$fee->amount  = $payment->get_surcharge();
-			$fee->taxable = false;
-			$order->add_fee( $fee );
+			$fee = new \WC_Order_Item_Fee();
+			$fee->set_name( __( 'Surcharge from Payment Gateway', 'wc-maksuturva' ) );
+			$fee->set_amount( $payment->get_surcharge() );
+			$fee->set_total( $payment->get_surcharge() );
+			$fee->set_tax_status( 'none' );
+			$fee->set_total_tax( 0 );
+			$order->add_item( $fee );
 			$order->calculate_totals();
 		}
 	}

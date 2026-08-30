@@ -226,8 +226,15 @@ class WC_Payment_Handling_Costs
 
 		if ($payment_handling_cost_fee === null) {
 			foreach ($order->get_fees() as $fee) {
-				if ($fee['name'] === __('Payment handling fee', 'wc-maksuturva')) {
-					$fee['total'] = 0;
+				$fee_name = is_object($fee) && method_exists($fee, 'get_name') ? $fee->get_name() : (isset($fee['name']) ? $fee['name'] : '');
+				if ($fee_name === __('Payment handling fee', 'wc-maksuturva')) {
+					if (is_object($fee) && method_exists($fee, 'set_total')) {
+						$fee->set_amount(0);
+						$fee->set_total(0);
+						$fee->save();
+					} else {
+						$fee['total'] = 0;
+					}
 					$order->calculate_totals();
 					return;
 				}
@@ -239,18 +246,26 @@ class WC_Payment_Handling_Costs
 		$fee_already_exists = false;
 
 		foreach ($order->get_fees() as $fee) {
-			if ($fee['name'] === __('Payment handling fee', 'wc-maksuturva')) {
-				$fee['total'] = $payment_handling_cost_fee;
+			$fee_name = is_object($fee) && method_exists($fee, 'get_name') ? $fee->get_name() : (isset($fee['name']) ? $fee['name'] : '');
+			if ($fee_name === __('Payment handling fee', 'wc-maksuturva')) {
+				if (is_object($fee) && method_exists($fee, 'set_total')) {
+					$fee->set_amount($payment_handling_cost_fee);
+					$fee->set_total($payment_handling_cost_fee);
+					$fee->save();
+				} else {
+					$fee['total'] = $payment_handling_cost_fee;
+				}
 				$fee_already_exists = true;
 			}
 		}
 
 		if (!$fee_already_exists) {
-			$fee = new \stdClass();
-			$fee->name = __('Payment handling fee', 'wc-maksuturva');
-			$fee->amount = $payment_handling_cost_fee;
-			$fee->taxable = true;
-			$order->add_fee($fee);
+			$fee = new \WC_Order_Item_Fee();
+			$fee->set_name(__('Payment handling fee', 'wc-maksuturva'));
+			$fee->set_amount($payment_handling_cost_fee);
+			$fee->set_total($payment_handling_cost_fee);
+			$fee->set_tax_status('taxable');
+			$order->add_item($fee);
 		}
 
 		$order->calculate_totals();
