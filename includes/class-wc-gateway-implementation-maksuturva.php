@@ -172,6 +172,16 @@ class WC_Gateway_Implementation_Maksuturva extends WC_Gateway_Abstract_Maksuturv
 			$data['pmt_paymentmethod'] = $selected_payment_method;
 		}
 
+		$buyer_identification_code = apply_filters(
+			'svea_payment_buyer_identification_code',
+			'',
+			$order
+		);
+
+		if (!empty($buyer_identification_code)) {
+			$data['pmt_buyeridentificationcode'] = $buyer_identification_code;
+		}
+
 		if ('yes' === $this->wc_gateway->get_option('debug_logging_enabled')) {
 			wc_maksuturva_log('Payment request message: ' . print_r($data, true));
 		}

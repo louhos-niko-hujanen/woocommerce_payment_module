@@ -35,6 +35,7 @@ For WooCommerce versions >8.3, see Docs for new feature compatibility.
 * `svea_payment_gateway_payment_method_error_message` - Filter for changing the error message when payment method is not available.
 * `svea_payment_gateway_payment_error_return_url` - Filter for changing the return URL when payment is returned with error state.
 * `svea_payment_filter_payment_methods` - Filter for modifying the payment methods array before it is returned.
+* `svea_payment_buyer_identification_code` - Filter for providing or modifying the buyer identification code before payment request is sent to the API.
 
 # Support
 
