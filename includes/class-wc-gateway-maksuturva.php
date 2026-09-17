@@ -898,9 +898,13 @@ class WC_Gateway_Maksuturva extends \WC_Payment_Gateway {
 				break;
 
 			case WC_Payment_Maksuturva::STATUS_CANCELLED:
-				$this->order_cancel( $order, $payment );
-				$this->add_notice( __( 'Cancellation from Svea received.', 'wc-maksuturva' ), 'notice' );
-				wp_redirect( add_query_arg( 'key', $order_handler->get_order_key(), $order->get_cancel_order_url() ) );
+				/**
+				 * Override returning to checkout page
+				 */
+				$this->add_notice( __( 'Error from Svea received.', 'wc-maksuturva' ), 'error' );
+				$this->order_fail( $order, $payment );
+				$error_url = apply_filters( 'svea_payment_gateway_payment_error_return_url', wc_get_checkout_url() );
+				wp_redirect( $error_url );
 				break;
 
 			case WC_Payment_Maksuturva::STATUS_COMPLETED:
