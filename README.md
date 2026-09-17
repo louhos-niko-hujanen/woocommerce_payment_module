@@ -6,10 +6,10 @@ Tags: svea, payment gateway, finland
 # System requirements
 
 * Requires at least: 6.0    
-* Tested up to: 7.1.0                  
-* Stable tag: 2.7.6                  
+* Tested up to: 7.0.2                 
+* Stable tag: 2.7.4                              
 * WC requires at least: 8.0  
-* WC tested up to: 11.0.1    
+* WC tested up to: 10.9.4                       
 
 There is no guarantee that the module is fully functional in any other environment which does not fulfill the requirements.
 
@@ -34,8 +34,6 @@ For WooCommerce versions >8.3, see Docs for new feature compatibility.
 
 * `svea_payment_gateway_payment_method_error_message` - Filter for changing the error message when payment method is not available.
 * `svea_payment_gateway_payment_error_return_url` - Filter for changing the return URL when payment is returned with error state.
-* `svea_payment_filter_payment_methods` - Filter for modifying the payment methods array before it is returned.
-* `svea_payment_buyer_identification_code` - Filter for providing or modifying the buyer identification code before payment request is sent to the API.
 
 # Support
 
